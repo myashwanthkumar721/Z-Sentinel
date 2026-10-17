@@ -112,3 +112,6 @@ docs/dataset.md
 docs/demo_script.md
 docs/methodology.md
 docs/problem_statement.md
+
+# Ignore empty local data placeholders
+config/data/
