@@ -115,3 +115,6 @@ docs/problem_statement.md
 
 # Ignore empty local data placeholders
 config/data/
+
+# Ignore empty local data placeholders
+config/data/
