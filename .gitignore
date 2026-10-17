@@ -1,0 +1,103 @@
+__pycache__/
+*.py[cod]
+
+.venv/
+
+.env
+
+.vscode/
+.idea/
+
+.ipynb_checkpoints/
+
+.pytest_cache/
+
+*.db
+*.sqlite
+*.sqlite3
+
+logs/
+
+models/*.pkl
+
+data/raw/*
+data/processed/*
+data/sample/*.csv
+# Python environments and generated files
+venv/
+ENV/
+*.py[cod]
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Secrets and local configuration
+.env*
+!.env.example
+*.pem
+*.key
+secrets/
+credentials/
+
+# Logs and local databases
+logs/
+*.log
+*.db
+*.sqlite
+*.sqlite3
+
+# Generated datasets and model artifacts
+data/raw/*
+data/processed/*
+models/*.pkl
+models/*.joblib
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Exclude datasets at any directory depth
+**/data/raw/*
+**/data/processed/*
+**/data/**/*.csv
+
+# Never commit local database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Exclude backup copies of source files
+*backup*
+
+# Ignore generated model artifacts
+*.pkl
+*.joblib
+
+# Ignore generated data and local databases
+*.jsonl
+*.parquet
+*.feather
+
+# Ignore temporary dashboard backups
+dashboard/*backup*
+dashboard/*.txt
+
+# Keep the example environment file
+!.env.example
+
+# Exclude all dashboard backup versions
+/dashboard/*before*.py
+/dashboard/*backup*
+/dashboard/*backup*.txt
+
+# Exclude empty placeholder notebooks
+/notebooks/
+
+# Exclude empty license and empty CI workflow until completed
+/LICENSE
+/.github/workflows/tests.yml

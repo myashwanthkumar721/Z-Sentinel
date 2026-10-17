@@ -1,0 +1,14 @@
+[
+  "amount",
+  "hour",
+  "transactions_last_1h",
+  "amount_last_1h",
+  "account_age_days",
+  "device_age_days",
+  "is_new_device",
+  "is_international",
+  "failed_attempts",
+  "merchant_risk",
+  "ip_risk",
+  "network_degree"
+]

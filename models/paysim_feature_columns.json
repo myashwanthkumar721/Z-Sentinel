@@ -1,0 +1,23 @@
+[
+  "step",
+  "transaction_type",
+  "amount",
+  "sender_balance_before",
+  "sender_balance_after",
+  "sender_balance_change",
+  "sender_balance_error",
+  "sender_zero_balance_after",
+  "receiver_balance_before",
+  "receiver_balance_after",
+  "receiver_balance_change",
+  "receiver_balance_error",
+  "receiver_zero_balance_before",
+  "amount_to_sender_balance_ratio",
+  "amount_exceeds_sender_balance",
+  "hour_proxy",
+  "day_proxy",
+  "is_flagged_fraud",
+  "origin_is_customer",
+  "destination_is_customer",
+  "same_account_type"
+]

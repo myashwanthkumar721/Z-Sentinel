@@ -1,0 +1,19 @@
+{
+  "dataset": "PaySim",
+  "train_ratio": 0.8,
+  "normal_sample_fraction": 0.1,
+  "classification_threshold": 0.5,
+  "accuracy": 1.0,
+  "precision": 1.0,
+  "recall": 1.0,
+  "f1": 1.0,
+  "roc_auc": 1.0,
+  "pr_auc": 0.9999999999999999,
+  "true_negatives": 1268270,
+  "false_positives": 0,
+  "false_negatives": 0,
+  "true_positives": 4254,
+  "test_rows": 1272524,
+  "test_fraud_rows": 4254,
+  "test_normal_rows": 1268270
+}
