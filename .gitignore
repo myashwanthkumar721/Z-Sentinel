@@ -101,3 +101,14 @@ dashboard/*.txt
 # Exclude empty license and empty CI workflow until completed
 /LICENSE
 /.github/workflows/tests.yml
+
+# Ignore empty placeholder files
+dashboard/charts.py
+dashboard/components.py
+dashboard/styles.py
+docs/api.md
+docs/architecture.md
+docs/dataset.md
+docs/demo_script.md
+docs/methodology.md
+docs/problem_statement.md
