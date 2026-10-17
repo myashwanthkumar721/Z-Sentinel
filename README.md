@@ -1,458 +1,243 @@
 # Z-Sentinel
+### Real-Time AI-Powered Fraud Detection and Investigation
 
-**AI-assisted real-time fraud detection and risk analysis system.**
+Z-Sentinel is an AI-powered fraud detection system designed to analyze transaction behavior, identify anomalies, uncover suspicious account relationships, and produce explainable risk decisions. It combines machine-learning predictions, behavioral analysis, network intelligence, and fraud-ring detection to support real-time transaction screening.
 
-Z-Sentinel analyzes financial transactions using multiple complementary signals to identify suspicious activity, evaluate risk, detect coordinated fraud networks, and provide explainable investigation evidence.
+The system classifies transactions into three outcomes:
 
----
+- **ALLOW** — Lower-risk transactions that can proceed.
+- **VERIFY** — Transactions requiring additional verification.
+- **HOLD** — Higher-risk transactions requiring further review or intervention.
 
-## Problem
-
-Traditional fraud detection systems can struggle when fraudulent behavior evolves across transactions, devices, IP addresses, and accounts.
-
-Z-Sentinel addresses this by combining:
-
-- Supervised fraud detection
-- Behavioral anomaly detection
-- Network intelligence
-- Coordinated fraud-ring detection
-- Velocity and device signals
-- Explainable risk scoring
-- Real-time transaction processing
+Z-Sentinel has been tested locally on Windows and deployed and validated in an IBM Z LinuxONE environment.
 
 ---
 
-## Core Pipeline
+## Table of Contents
 
-```text
-Transaction
-    |
-    v
-Fraud ML
-    |
-    v
-Anomaly Detection
-    |
-    v
-Network Intelligence
-    |
-    v
-Fraud-Ring Analysis
-    |
-    v
-Risk Engine
-    |
-    v
-Explainability / Investigation
-    |
-    v
-ALLOW / VERIFY / HOLD
-```
+1. [Problem Statement](#problem-statement)
+2. [Key Features](#key-features)
+3. [System Architecture](#system-architecture)
+4. [Risk Decision Workflow](#risk-decision-workflow)
+5. [Technology Stack](#technology-stack)
+6. [IBM LinuxONE Implementation and Validation](#ibm-linuxone-implementation-and-validation)
+7. [API Documentation](#api-documentation)
+8. [Installation](#installation)
+9. [Running the Application](#running-the-application)
+10. [Testing](#testing)
+11. [Project Structure](#project-structure)
+12. [Example API Response](#example-api-response)
+13. [Limitations and Future Improvements](#limitations-and-future-improvements)
+14. [Security Considerations](#security-considerations)
+15. [Intended Beneficiaries](#intended-beneficiaries)
+16. [Disclaimer](#disclaimer)
 
 ---
 
-## Solution Overview
+## 1. Problem Statement
 
-Z-Sentinel uses a layered fraud-analysis architecture rather than relying on a single model output.
+Digital payments and online financial transactions can be exposed to fraudulent activities, abnormal transaction patterns, coordinated account behavior, and suspicious networks of related accounts.
 
-A transaction is analyzed by the fraud model and behavioral anomaly detector. Network intelligence evaluates relationships between accounts, devices, IP addresses, and merchants. Coordinated activity can be identified through fraud-ring analysis.
+Traditional rule-based systems can struggle to identify complex patterns that evolve across transaction histories and connected accounts. They may also provide limited explanations for why a transaction was flagged.
 
-The resulting signals are combined by the risk engine into a normalized risk score from 0 to 100. The decision policy maps the score to an operational action:
+Z-Sentinel addresses these challenges by combining multiple risk signals into an explainable transaction analysis workflow. The system evaluates transaction characteristics, behavioral anomalies, network relationships, and model predictions to produce a risk score and a recommended decision.
 
-```text
-0 - 39    -> ALLOW
-40 - 69   -> VERIFY
-70 - 100  -> HOLD
-```
-
-The system also generates investigation evidence so analysts can understand the signals contributing to a decision.
+The project is a prototype intended to demonstrate an approach to fraud detection. Its performance and effectiveness in production financial environments require additional evaluation.
 
 ---
 
-# Key Features
+## 2. Key Features
 
-## 1. Supervised Fraud Detection
+### Transaction Risk Scoring
+Combines available risk signals to calculate a transaction risk score and determine a recommended action.
 
-Z-Sentinel supports multiple model modes:
+### Behavioral Anomaly Detection
+Analyzes transaction behavior to identify unusual patterns that may warrant additional investigation.
 
-- Existing demonstration model
-- PaySim-trained fraud model
+### Machine-Learning Prediction
+Supports model-based fraud prediction through the configured model pipeline.
 
-The prediction layer provides a common interface so the rest of the system can work with different model configurations.
+### Network Intelligence
+Examines relationships between accounts and transactions to identify potentially suspicious connected activity.
 
-## 2. Behavioral Anomaly Detection
+### Fraud-Ring Analysis
+Evaluates coordinated patterns and relationships that may indicate a group of related suspicious accounts.
 
-Anomaly detection identifies transaction behavior that differs from expected patterns.
+### Explainable Decisions
+Returns risk indicators and explanatory reasons to help users understand why a transaction received a particular decision.
 
-This provides a complementary signal to supervised fraud probability.
+### Streaming and Transaction Processing
+Includes components for processing transaction events and demonstrating a transaction analysis workflow.
 
-## 3. Network Intelligence
-
-Z-Sentinel builds a heterogeneous transaction relationship graph involving:
-
-- Accounts
-- Devices
-- IP addresses
-- Merchants
-
-Example:
-
-```text
-Account A ---- Device X ---- Account B
-     |                         |
-     +------ IP Y -------------+
-     |
-     +------ Merchant Z -------+
-```
-
-## 4. Coordinated Fraud-Ring Detection
-
-Accounts become connected when they share infrastructure such as:
-
-- Device
-- IP address
-- Merchant
-
-The system identifies connected groups and calculates a fraud-ring score.
-
-## 5. Multi-Signal Risk Engine
-
-| Signal | Weight |
-|---|---:|
-| ML probability | 35% |
-| Anomaly score | 15% |
-| Network score | 20% |
-| Fraud-ring score | 15% |
-| Velocity score | 10% |
-| Device score | 5% |
-| **Total** | **100%** |
-
-Conceptually:
-
-```text
-Final Risk
-    =
-ML contribution
-+ Anomaly contribution
-+ Network contribution
-+ Fraud-ring contribution
-+ Velocity contribution
-+ Device contribution
-```
-
-## 6. Decision Policy
-
-| Risk Score | Decision | Meaning |
-|---:|---|---|
-| 0–39 | ALLOW | Low combined risk |
-| 40–69 | VERIFY | Additional verification required |
-| 70–100 | HOLD | High combined risk |
-
-## 7. Explainable Investigation
-
-Investigation evidence includes:
-
-### Risk Contributions
-- ML
-- Anomaly
-- Network
-- Fraud Ring
-- Velocity
-- Device
-
-### Transaction Evidence
-- Transaction amount
-- Transactions in the last hour
-- Failed attempts
-- New-device status
-- International activity
-- Merchant risk
-- IP risk
-
-### Network Evidence
-- Network degree
-- Network score
-- Fraud-ring score
-- Connected account count
-- Connected accounts
-
-### Decision Evidence
-- Final risk score
-- Final decision
-- Human-readable decision summary
-
-## 8. Real-Time Transaction Streaming
-
-Z-Sentinel includes a transaction stream simulator for controlled real-time demonstrations.
-
----
-
-# Complete Architecture
-
-```text
-                    +----------------------+
-                    |     Transaction      |
-                    +----------+-----------+
-                               |
-                               v
-                    +----------------------+
-                    |   Feature / Input    |
-                    |      Processing      |
-                    +----------+-----------+
-                               |
-              +----------------+----------------+
-              |                                 |
-              v                                 v
-     +-------------------+             +-------------------+
-     |   Fraud ML Model  |             | Anomaly Detection |
-     +---------+---------+             +---------+---------+
-               |                                 |
-               +----------------+----------------+
-                                |
-                                v
-                    +----------------------+
-                    | Network Intelligence |
-                    +----------+-----------+
-                               |
-                               v
-                    +----------------------+
-                    |  Fraud-Ring Analysis |
-                    +----------+-----------+
-                               |
-                               v
-                    +----------------------+
-                    |     Risk Engine      |
-                    +----------+-----------+
-                               |
-                               v
-                    +----------------------+
-                    |   Decision Policy    |
-                    +----------+-----------+
-                               |
-                +--------------+--------------+
-                |              |              |
-                v              v              v
-             ALLOW          VERIFY          HOLD
-                |              |              |
-                +--------------+--------------+
-                               |
-                               v
-                    +----------------------+
-                    | Investigation /      |
-                    | Explainability       |
-                    +----------+-----------+
-                               |
-                               v
-                    +----------------------+
-                    | FastAPI + Dashboard  |
-                    +----------------------+
-```
-
----
-
-# Network Intelligence Architecture
-
-```text
-                  TRANSACTION
-                       |
-        +--------------+--------------+
-        |              |              |
-        v              v              v
-     ACCOUNT         DEVICE           IP
-        |              |              |
-        +--------------+--------------+
-                       |
-                       v
-                    MERCHANT
-```
-
-Node identities use:
-
-```text
-account:<id>
-device:<id>
-ip:<address>
-merchant:<id>
-```
-
-Relationships include:
-
-```text
-account -- uses_device   -- device
-account -- uses_ip       -- ip
-account -- uses_merchant -- merchant
-```
-
----
-
-# Fraud-Ring Logic
-
-```text
-Account A
-    |
-    | shared device / IP / merchant
-    |
-Account B
-    |
-    | shared infrastructure
-    |
-Account C
-```
-
-The account graph can look like:
-
-```text
-        Account A
-        /       \
-       /         \
-Account B ------- Account C
-```
-
-The system reports:
-
-- Connected accounts
-- Shared connections
-- Account count
-- Network density
-- Fraud-ring score
-
----
-
-# Technology Stack
-
-- Python
-- FastAPI
-- Streamlit
-- Scikit-learn
-- XGBoost
-- Pandas
-- NumPy
-- NetworkX
-- SQLAlchemy
-- SQLite
-- Plotly
-- Docker
-- Pytest
-
----
-
-# Project Structure
-
-```text
-Z-Sentinel/
-|
-├── README.md
-├── LICENSE
-├── .gitignore
-├── requirements.txt
-├── .env.example
-├── docker-compose.yml
-├── Dockerfile
-├── app.py
-|
-├── config/
-│   ├── __init__.py
-│   ├── settings.py
-│   ├── thresholds.py
-│   └── model_config.py
-|
-├── data/
-│   ├── raw/
-│   ├── processed/
-│   └── sample/
-|
-├── models/
-|
-├── notebooks/
-|
-├── src/
-│   ├── data/
-│   ├── features/
-│   ├── detection/
-│   ├── anomaly/
-│   ├── network/
-│   ├── risk/
-│   ├── streaming/
-│   └── utils/
-|
-├── api/
-├── dashboard/
-├── database/
-├── tests/
-├── scripts/
-└── docs/
-```
-
----
-
-# Important Components
-
-### Detection
-
-- Fraud model loading
-- Prediction
-- Model routing
-- PaySim prediction
-- Prediction adapter
-
-### Anomaly
-
-Behavioral anomaly detection.
-
-### Network
-
-- Historical network data
-- Transaction graph construction
-- Account relationships
-- Fraud-ring detection
-
-### Risk
-
-- Risk calculation
-- Risk contributions
-- Decision policy
-- Explanation generation
-- Investigation evidence
-
-### Streaming
-
-- Transaction simulation
-- Controlled demo streams
-- Real-time processing
-
-### API
-
-FastAPI service and transaction-analysis endpoints.
+### API Integration
+Provides a FastAPI-based interface for health checks and transaction analysis.
 
 ### Dashboard
+Includes dashboard implementations for viewing and exploring fraud-detection information.
 
-Streamlit security-operations style interface.
-
----
-
-# Local Setup
-
-```powershell
-cd C:\movies\Projects\Z-Sentinel
-.\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-```
+### IBM Z LinuxONE Validation
+The application and automated tests have been executed in a LinuxONE environment using the IBM Z `s390x` architecture.
 
 ---
 
-# Run the API
+## 3. System Architecture
 
-```powershell
-uvicorn app:app --reload
-```
+Z-Sentinel uses a modular architecture to separate API handling, transaction processing, feature analysis, detection, network intelligence, and risk decisions.
 
-API:
+### High-Level Workflow
 
 ```text
-http://127.0.0.1:8000
+Transaction Input
+       |
+       v
+API and Transaction Processing
+       |
+       v
+Transaction Validation and Features
+       |
+       +--------------------------+
+       |             |            |
+       v             v            v
+  ML Prediction  Anomaly       Network and
+                 Detection     Fraud-Ring Analysis
+       |             |            |
+       +-------------+------------+
+                     |
+                     v
+              Risk Assessment
+                     |
+                     v
+             Explainable Decision
+                     |
+          +----------+----------+
+          |          |          |
+          v          v          v
+        ALLOW      VERIFY      HOLD
 ```
 
-Interactive documentation:
+The exact signals available to a decision depend on the active model configuration and the transaction data supplied.
+
+### Main Components
+
+- **API layer:** Accepts requests and returns structured results.
+- **Data and feature layer:** Validates transaction information and derives analysis features.
+- **Detection layer:** Provides model prediction and anomaly-detection components.
+- **Network layer:** Analyzes account relationships and suspicious connected activity.
+- **Risk layer:** Combines supported risk indicators into a score and decision.
+- **Streaming layer:** Provides transaction event-processing components.
+- **Dashboard layer:** Provides interfaces for examining fraud-detection results.
+
+---
+
+## 4. Risk Decision Workflow
+
+Z-Sentinel produces a numerical risk score and maps the result to a recommended action.
+
+The documented decision ranges are:
+
+| Risk Score | Decision | Meaning |
+|---|---|---|
+| 0–39 | ALLOW | Lower-risk transaction |
+| 40–69 | VERIFY | Additional verification recommended |
+| 70–100 | HOLD | Further review or intervention recommended |
+
+These ranges describe the project's configured decision policy. They should not be interpreted as calibrated probabilities of fraud.
+
+The analysis may include:
+
+- Model-based prediction.
+- Behavioral anomaly indicators.
+- Network relationship analysis.
+- Fraud-ring indicators.
+- Explanatory reasons supporting the decision.
+
+A decision is a screening recommendation, not proof that a transaction is fraudulent.
+
+---
+
+## 5. Technology Stack
+
+The project includes the following technologies and components:
+
+- **Language:** Python.
+- **API framework:** FastAPI.
+- **Data validation:** Pydantic-based request and response schemas.
+- **Machine learning:** Configurable prediction components, including an optional XGBoost-based PaySim model path.
+- **Analysis:** Behavioral features, anomaly detection, network analysis, and risk scoring.
+- **Testing:** pytest.
+- **Dashboard:** Python dashboard implementations.
+- **Containerization:** Docker and Docker Compose configuration.
+- **Version control:** Git and GitHub.
+- **Target platform validation:** IBM Z LinuxONE running Ubuntu on `s390x`.
+
+The optional PaySim/XGBoost model has not been successfully validated on the tested LinuxONE environment; see the platform compatibility note below.
+
+---
+
+## 6. IBM LinuxONE Implementation and Validation
+
+Z-Sentinel was deployed and tested in an IBM Z LinuxONE environment to verify that the application could run on the target architecture.
+
+### Validated Environment
+
+| Component | Verified Result |
+|---|---|
+| Platform architecture | IBM Z / `s390x` |
+| Operating system | Ubuntu 24.04.5 LTS |
+| Python version | 3.12.3 |
+| API health check | Passed |
+| Automated tests | 25 passed |
+| Synthetic transaction API demonstration | HTTP 200 |
+
+### Validation Activities
+
+The following activities were completed:
+
+1. Deployed the Z-Sentinel application in the LinuxONE environment.
+2. Verified the machine architecture using the system's architecture information.
+3. Checked the Python runtime version.
+4. Started and accessed the FastAPI application.
+5. Confirmed that the health endpoint returned a successful response.
+6. Executed the automated test suite, with **25 tests passing**.
+7. Submitted a synthetic transaction through the API and received a successful HTTP 200 response.
+8. Inspected the resulting risk score, model probability, anomaly score, network score, fraud-ring score, and recommended decision.
+
+### Health Check
+
+The following endpoint was verified:
+
+```text
+GET /api/health
+```
+
+Successful response:
+
+```json
+{
+  "status": "ok",
+  "service": "Z-Sentinel"
+}
+```
+
+### Synthetic Transaction Demonstration
+
+A controlled synthetic transaction produced the following example results:
+
+| Output | Example Result |
+|---|---|
+| Transaction amount | 1,250.50 synthetic currency units |
+| Risk score | 46.23 |
+| Recommended decision | VERIFY |
+| Model probability | Approximately 59.08% |
+| Anomaly score | 0.578543 |
+| Network score | 0.375 |
+| Fraud-ring score | 0.625 |
+
+The example transaction was assigned the `VERIFY` decision. The scores demonstrate the API's output for this specific synthetic input; they do not establish real-world fraud-detection accuracy.
+
+### Accessing the API Documentation
+
+When the application is running locally, open:
 
 ```text
 http://127.0.0.1:8000/docs
@@ -464,774 +249,275 @@ Health endpoint:
 http://127.0.0.1:8000/api/health
 ```
 
----
+The local documentation address is accessible from the machine running the application or through a correctly configured SSH tunnel when the application runs remotely.
 
-# Run the Dashboard
+### LinuxONE Compatibility Note
 
-Open a second terminal:
+The existing demo-model configuration and the application's API and automated test suite were validated in the tested LinuxONE environment.
 
-```powershell
-cd C:\movies\Projects\Z-Sentinel
-.\.venv\Scripts\Activate.ps1
-streamlit run dashboard\dashboard.py
-```
+The optional PaySim/XGBoost model could not be loaded on `s390x` because a compatible XGBoost package was unavailable from the configured package index. Consequently, that optional model configuration remains unvalidated on LinuxONE.
 
-Dashboard sections include:
-
-- Live Risk Monitor
-- Network Intelligence
-- Fraud Ring
-- Risk Signals
-- Investigation Center
-- Transaction information
-- Decision reasons
+Successful execution of the tested application and test suite does not, by itself, establish production readiness, full compatibility of every optional dependency, or real-world fraud-detection accuracy.
 
 ---
 
-# Run the Streaming Demo
+## 7. API Documentation
 
-```powershell
-python -m src.streaming.runner --demo
-python -m src.streaming.runner --help
-```
+Z-Sentinel exposes API endpoints through FastAPI.
 
-Available options:
+### Health Endpoint
 
-```text
---demo
---interval
---max-transactions
-```
-
----
-
-# Run the Fraud-Ring Demonstration
-
-```powershell
-python -m scripts.demo_fraud_ring
-```
-
-The controlled demonstration validates:
-
-- Shared-device relationships
-- Shared-IP relationships
-- Shared-merchant relationships
-- Connected-account detection
-- Fraud-ring scoring
-- Coordinated activity detection
-
----
-
-# Run Tests
-
-```powershell
-python -m pytest -q
-```
-
-Validated regression result:
-
-```text
-25 passed
-2 warnings
-```
-
----
-
-# Data Generation and Model Training
-
-```powershell
-python -m scripts.generate_demo_data
-python -m scripts.train_model
-python -m scripts.train_anomaly_model
-python -m scripts.train_paysim_model
-```
-
-Scripts should be executed from the project root using module mode.
-
----
-
-# PaySim Dataset Integration
-
-Z-Sentinel was integrated with the PaySim financial transaction dataset.
-
-Dataset characteristics used during development:
-
-```text
-Rows: approximately 6.36 million
-Fraud transactions: 8,213
-Normal transactions: 6,354,407
-Fraud rate: approximately 0.1291%
-```
-
-PaySim columns include:
-
-```text
-step
-type
-amount
-nameOrig
-oldbalanceOrg
-newbalanceOrig
-nameDest
-oldbalanceDest
-newbalanceDest
-isFraud
-isFlaggedFraud
-```
-
-The dataset was preprocessed into model-ready features.
-
----
-
-# PaySim Model
-
-The PaySim model uses XGBoost with a chronological held-out evaluation design.
-
-The robustness audit removed these leakage-like features:
-
-```text
-sender_zero_balance_after
-sender_balance_error
-amount_exceeds_sender_balance
-sender_balance_change
-sender_balance_after
-is_flagged_fraud
-```
-
-The final audited model retained 15 features.
-
----
-
-# PaySim Transaction Types
-
-```text
-CASH_IN   -> 0
-CASH_OUT  -> 1
-DEBIT     -> 2
-PAYMENT   -> 3
-TRANSFER  -> 4
-```
-
----
-
-# Evaluation & Benchmarking
-
-## Existing Demonstration Model
-
-| Metric | Result |
-|---|---:|
-| Accuracy | 69.60% |
-| Precision | 64.82% |
-| Recall | 61.14% |
-| F1 Score | 62.93% |
-| ROC-AUC | 72.12% |
-
-These results describe the demonstration dataset and model configuration.
-
-## PaySim Held-Out Results
-
-| Metric | Result |
-|---|---:|
-| Accuracy | 99.99% |
-| Precision | 97.63% |
-| Recall | 99.76% |
-| F1 Score | 98.69% |
-| ROC-AUC | 1.0000 |
-| PR-AUC | 0.9979 |
-
-These results are on held-out PaySim evaluation data and do not guarantee equivalent performance on real-world financial traffic.
-
-## Confusion Matrix
-
-| | Predicted Normal | Predicted Fraud |
-|---|---:|---:|
-| Actual Normal | 1,268,167 | 103 |
-| Actual Fraud | 10 | 4,244 |
-
----
-
-# PaySim Threshold Analysis
-
-| Threshold | Precision | Recall |
-|---:|---:|---:|
-| 0.01 | 99.65% | 100.00% |
-| 0.05 | 99.84% | 100.00% |
-| 0.10 | 99.91% | 100.00% |
-| 0.20 | 99.95% | 100.00% |
-| 0.30 | 100.00% | 100.00% |
-| 0.40 | 100.00% | 100.00% |
-| 0.50 | 100.00% | 100.00% |
-| 0.60 | approximately 100.00% | 99.98% |
-| 0.70 | approximately 100.00% | 99.98% |
-| 0.80 | approximately 100.00% | 99.98% |
-| 0.90 | approximately 100.00% | 99.95% |
-| 0.95 | approximately 100.00% | 99.95% |
-
-Thresholds can be recalibrated for production according to operational requirements and acceptable false-positive/false-negative trade-offs.
-
----
-
-# Risk Engine
-
-The final risk score combines six normalized signals:
-
-```text
-ML probability      -> 35%
-Anomaly score       -> 15%
-Network score       -> 20%
-Fraud-ring score    -> 15%
-Velocity score      -> 10%
-Device score        ->  5%
-                         ---
-                        100%
-```
-
-The final score is constrained to the 0–100 range.
-
----
-
-# Investigation & Explainability
-
-```text
-Transaction
-     |
-     +-------------------+
-     |                   |
-     v                   v
- ML Probability     Anomaly Score
-     |                   |
-     +---------+---------+
-               |
-               v
-      Network Intelligence
-               |
-               v
-       Fraud-Ring Analysis
-               |
-               v
-        Risk Contributions
-               |
-               v
-          Risk Score
-               |
-               v
-           Decision
-               |
-               v
-      Investigation Evidence
-```
-
-Investigation evidence contains:
-
-```text
-risk_contributions
-transaction_evidence
-network_evidence
-decision_summary
-risk_score
-decision
-```
-
----
-
-# Investigation API Validation
-
-A complete end-to-end transaction was successfully processed through the live API.
-
-The validated response included:
-
-```text
-HTTP: 200
-Decision: VERIFY
-Investigation: True
-Transaction Evidence: True
-Network Evidence: True
-```
-
-One controlled verification also confirmed that the individual risk contributions sum to the final risk score.
-
----
-
-# API
-
-Primary transaction endpoint:
-
-```text
-POST /api/analyze
-```
-
-Health endpoint:
-
-```text
+```http
 GET /api/health
 ```
 
-The analysis response contains transaction information, risk signals, risk score, decision, and investigation evidence.
+Purpose: Checks the application's health and returns its service status.
 
----
+### Transaction Analysis Endpoint
 
-# API Error Handling
-
-The API handles:
-
-- Invalid request values
-- Missing model/resource files
-- Duplicate transactions
-- HTTP exceptions
-- Unexpected server-side failures
-
-Typical categories:
-
-```text
-200 -> successful analysis
-400 -> invalid request
-409 -> duplicate transaction
-503 -> required model/resource unavailable
-500 -> unexpected server-side error
+```http
+POST /api/analyze
 ```
 
+Purpose: Accepts transaction-analysis input and returns the available risk assessment results.
+
+Use the interactive API documentation at `/docs` to inspect the request schema and submit a request matching the current application implementation.
+
+The precise response fields depend on the configured request schema and analysis pipeline.
+
 ---
 
-# Duplicate Protection
+## 8. Installation
 
-Repeated submission of the same transaction identifier can be rejected rather than processed as a new transaction.
+### Prerequisites
 
-Validation performed during development confirmed:
+- Python version compatible with the pinned project dependencies.
+- Git.
+- A terminal such as PowerShell or Bash.
+- Optional: Docker, if using the project's container configuration.
 
-```text
-First request   -> HTTP 200
-Immediate repeat -> HTTP 409
+### Clone the Repository
+
+```bash
+git clone https://github.com/myashwanthkumar721/Z-Sentinel.git
+cd Z-Sentinel
 ```
 
----
+### Create a Virtual Environment
 
-# Model Routing
-
-Supported model modes:
-
-```text
-existing
-paysim
-```
-
-The model router selects the requested model while maintaining a common prediction interface.
-
----
-
-# Real-Time Architecture
-
-```text
-Transaction Simulator
-        |
-        v
-Transaction Processor
-        |
-        +----------------+
-        |                |
-        v                v
-     ML Model       Anomaly Model
-        |                |
-        +-------+--------+
-                |
-                v
-       Network Analysis
-                |
-                v
-       Risk Engine
-                |
-                v
-        Decision Engine
-                |
-                v
-       Investigation
-```
-
----
-
-# Fraud-Ring Controlled Demonstration
-
-The controlled scenario uses three accounts with shared infrastructure.
-
-```text
-RING-DEMO-01
-      |
-      | shared infrastructure
-      v
-RING-DEMO-02
-      |
-      | shared infrastructure
-      v
-RING-DEMO-03
-```
-
-Validated progression:
-
-```text
-Transaction 1
-Ring score: 0.0000
-Connected accounts: []
-
-Transaction 2
-Ring score: 0.1250
-Connected accounts: first account
-
-Transaction 3
-Ring score: 0.2500
-Connected accounts: two accounts
-Fraud ring detected: True
-```
-
-Final controlled group:
-
-```text
-3 accounts
-Network density: 1.0
-```
-
-Fraud-ring acceptance checks passed.
-
----
-
-# Streaming Validation
-
-The controlled streaming demonstration uses a mixture of normal and suspicious scenarios.
-
-The simulator is intended for demonstration and testing. Scenario generation is not a substitute for production ground truth.
-
----
-
-# Automated Regression
-
-The complete automated regression suite has been validated:
-
-```text
-25 passed
-2 warnings
-```
-
-Core areas checked include:
-
-- Data processing
-- Model prediction
-- Anomaly detection
-- Network analysis
-- Risk engine
-- Fraud-ring detection
-- API
-- Duplicate protection
-- Streaming components
-
----
-
-# Data Handling
-
-The raw PaySim dataset is intentionally not included in the repository.
-
-Large datasets should be downloaded separately and placed in the appropriate data directory according to the project's data-processing workflow.
-
-Do not commit:
-
-- Large raw datasets
-- Sensitive financial information
-- Private transaction data
-
----
-
-# Security
-
-Never commit:
-
-- API keys
-- Passwords
-- Access tokens
-- Private credentials
-- `.env` files containing secrets
-- Sensitive transaction information
-
-Use `.env.example` as the configuration template where applicable.
-
-Before publishing the project, inspect the repository for secrets and large datasets.
-
----
-
-# Reproducibility
-
-Use module mode from the project root:
+On Windows PowerShell:
 
 ```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+On Linux:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### Install Dependencies
+
+```bash
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+Dependency availability can vary by operating system and CPU architecture. In particular, the optional PaySim/XGBoost configuration may require additional compatibility work on IBM Z `s390x`.
+
+---
+
+## 9. Running the Application
+
+Start the FastAPI application from the project root using the repository's application entry point:
+
+```bash
+uvicorn app:app --host 127.0.0.1 --port 8000
+```
+
+If the application is running on a remote LinuxONE host, use an SSH tunnel or an appropriately secured network configuration to access it from your development machine.
+
+Once the application is running, open:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+Check the health endpoint:
+
+```bash
+curl http://127.0.0.1:8000/api/health
+```
+
+Use the actual configured model and request schema when testing transaction analysis.
+
+---
+
+## 10. Testing
+
+The project includes automated tests covering several components, including API behavior, configuration, data processing, detection, network analysis, risk scoring, utilities, and fraud-ring logic.
+
+Run the test suite with:
+
+```bash
 python -m pytest -q
-python -m scripts.generate_demo_data
-python -m scripts.train_model
-python -m scripts.train_anomaly_model
-python -m scripts.demo_fraud_ring
-python -m src.streaming.runner --demo
 ```
+
+### Recorded Test Results
+
+| Environment | Result |
+|---|---|
+| Windows development environment | 25 passed |
+| IBM Z LinuxONE environment | 25 passed |
+
+The Windows run also reported two dependency deprecation warnings. Those warnings did not cause the tests to fail.
+
+These results represent the test suite available at the time of validation. Future code or dependency changes should be retested.
 
 ---
 
-# Evaluation Report
-
-Detailed evaluation information is available in:
+## 11. Project Structure
 
 ```text
-docs/evaluation_report.md
+Z-Sentinel/
+├── api/
+│   ├── dependencies.py
+│   ├── routes.py
+│   └── schemas.py
+├── config/
+│   ├── model_config.py
+│   ├── settings.py
+│   └── thresholds.py
+├── dashboard/
+│   ├── dashboard.py
+│   └── live_dashboard.py
+├── database/
+│   ├── database.py
+│   ├── models.py
+│   └── repository.py
+├── docs/
+│   ├── evaluation_report.md
+│   └── paysim_model_evaluation.md
+├── models/
+│   ├── feature_columns.json
+│   ├── paysim_feature_columns.json
+│   └── paysim_model_metrics.json
+├── scripts/
+│   ├── generate_demo_data.py
+│   ├── preprocess_data.py
+│   ├── preprocess_paysim.py
+│   ├── train_model.py
+│   └── train_paysim_model.py
+├── src/
+│   ├── anomaly/
+│   ├── data/
+│   ├── detection/
+│   ├── features/
+│   ├── network/
+│   ├── risk/
+│   ├── streaming/
+│   └── utils/
+├── tests/
+├── .env.example
+├── .gitignore
+├── Dockerfile
+├── docker-compose.yml
+├── requirements.txt
+├── README.md
+└── app.py
 ```
 
-The report contains:
-
-- Existing-model benchmark
-- PaySim benchmark
-- Confusion matrix
-- Threshold analysis
-- Risk-weight configuration
-- Investigation validation
-- Fraud-ring validation
-- API validation
-- Automated regression
-- Model coverage
-- Limitations
-- Reproducibility notes
+The structure above highlights the main source directories and entry points; additional implementation and test scripts are present in the repository.
 
 ---
 
-# Demo Checklist
+## 12. Example API Response
 
-```text
-[ ] Activate .venv
-[ ] Start FastAPI
-[ ] Confirm /api/health
-[ ] Start Streamlit dashboard
-[ ] Confirm dashboard connection
-[ ] Analyze a transaction
-[ ] Show risk score
-[ ] Show decision
-[ ] Show investigation evidence
-[ ] Show network intelligence
-[ ] Run coordinated fraud-ring demo
-[ ] Show connected accounts
-[ ] Show fraud-ring score
-[ ] Run streaming demonstration
-[ ] Confirm tests pass
+The following values summarize the previously validated synthetic demonstration. They are provided to illustrate the result format, not as a guaranteed response for every request.
+
+```json
+{
+  "risk_score": 46.23,
+  "decision": "VERIFY",
+  "ml_probability": 0.5907679695,
+  "anomaly_score": 0.578543,
+  "network_score": 0.375,
+  "fraud_ring_score": 0.625
+}
 ```
 
----
-
-# Recommended Demo Sequence
-
-```text
-1. Start the FastAPI backend
-          |
-          v
-2. Open the Streamlit dashboard
-          |
-          v
-3. Show system status
-          |
-          v
-4. Analyze a transaction
-          |
-          v
-5. Show ALLOW / VERIFY / HOLD
-          |
-          v
-6. Open Risk Signals
-          |
-          v
-7. Open Investigation Center
-          |
-          v
-8. Show transaction evidence
-          |
-          v
-9. Show network evidence
-          |
-          v
-10. Run coordinated fraud-ring demo
-          |
-          v
-11. Show connected-account intelligence
-          |
-          v
-12. Show final fraud-ring detection
-```
+The exact JSON structure returned by the running API may include additional fields. Use `/docs` to inspect the current response schema.
 
 ---
 
-# Development Status
+## 13. Limitations and Future Improvements
 
-## Phases 1–16
+### Current Limitations
 
-Completed:
+- The demonstrated transaction results use synthetic data.
+- Production fraud-detection accuracy has not been established by the example transaction.
+- The optional PaySim/XGBoost model could not be loaded in the tested LinuxONE environment.
+- Compatibility of every optional model and dependency has not been established across all CPU architectures.
+- Production deployment would require further security, performance, operational, and financial-domain validation.
 
-- Core project foundation
-- Data pipeline
-- Fraud ML
-- Anomaly detection
-- Network intelligence
-- Risk engine
-- Decision and explanation system
-- Streaming
-- FastAPI integration
-- Streamlit dashboard
-- PaySim integration
-- Model routing
-- Fraud-ring detection
-- Investigation evidence
-- Evaluation and benchmarking
+### Future Improvements
 
-## Phase 17
-
-Final local hackathon packaging includes:
-
-- README finalization
-- Documentation consistency
-- Security/repository cleanup
-- Final API/dashboard/streaming validation
-- Demo readiness
-- Final project completion check
+- Resolve and test XGBoost compatibility for IBM Z `s390x`.
+- Validate model performance on appropriate held-out datasets.
+- Measure false-positive and false-negative rates.
+- Evaluate latency and throughput under representative transaction loads.
+- Improve monitoring, logging, and model-performance reporting.
+- Add controlled deployment and integration tests.
+- Evaluate secure authentication, authorization, audit trails, and production data handling.
+- Conduct further validation on representative hardware and workloads.
 
 ---
 
-# Limitations
+## 14. Security Considerations
 
-Z-Sentinel is a hackathon and research-oriented prototype.
+Z-Sentinel is a prototype and should not be deployed directly into a production financial environment without additional review.
 
-Important limitations:
+Before production use:
 
-1. PaySim is a synthetic financial transaction dataset.
-2. Benchmark results do not guarantee equivalent performance on live production traffic.
-3. Fraud patterns can change over time.
-4. Network detection depends on the quality and availability of historical relationship data.
-5. Risk thresholds may require recalibration for production.
-6. Real-world deployment would require monitoring and retraining policies.
-7. Production use would require appropriate security, privacy, compliance, and operational validation.
-8. The system is designed to assist fraud investigation and should not replace appropriate human and organizational controls.
+- Protect API endpoints with appropriate authentication and authorization.
+- Avoid exposing development servers directly to the public internet.
+- Keep credentials, tokens, private keys, and environment-specific secrets out of source control.
+- Apply access controls and retention policies to transaction data and logs.
+- Use encrypted network communication for remote access.
+- Validate inputs and monitor operational failures.
+- Assess privacy, regulatory, and financial-sector requirements.
 
----
-
-# Final System Summary
-
-Z-Sentinel combines transaction-level, behavioral, and network-level evidence to support real-time fraud analysis.
-
-```text
-+---------------------+
-| Transaction Input   |
-+----------+----------+
-           |
-           v
-+---------------------+
-| Feature Processing  |
-+----------+----------+
-           |
-           +----------------------+
-           |                      |
-           v                      v
-+----------------+       +-------------------+
-| Fraud ML       |       | Anomaly Detection |
-+--------+-------+       +---------+---------+
-         |                         |
-         +------------+------------+
-                      |
-                      v
-             +----------------+
-             | Network        |
-             | Intelligence   |
-             +-------+--------+
-                     |
-                     v
-             +----------------+
-             | Fraud-Ring     |
-             | Detection      |
-             +-------+--------+
-                     |
-                     v
-             +----------------+
-             | Risk Engine    |
-             +-------+--------+
-                     |
-                     v
-             +----------------+
-             | Decision       |
-             | Policy         |
-             +-------+--------+
-                     |
-             +-------+-------+
-             |       |       |
-             v       v       v
-           ALLOW   VERIFY   HOLD
-             |       |       |
-             +-------+-------+
-                     |
-                     v
-             +----------------+
-             | Investigation  |
-             | Evidence       |
-             +-------+--------+
-                     |
-                     v
-             +----------------+
-             | API / Dashboard|
-             +----------------+
-```
+The repository's `.env.example` is intended to document placeholder configuration values. Real credentials must be supplied securely outside version control.
 
 ---
 
-# What Z-Sentinel Demonstrates
+## 15. Intended Beneficiaries
 
-```text
-Machine Learning
-       +
-Behavioral Analysis
-       +
-Graph / Network Intelligence
-       +
-Fraud-Ring Detection
-       +
-Risk Scoring
-       +
-Explainability
-       +
-Real-Time Processing
-```
+Potential beneficiaries include:
 
-Instead of producing only a binary fraud prediction, the system produces a risk score, operational decision, and supporting investigation evidence.
+- Banks and financial institutions.
+- Digital payment providers.
+- Fintech platforms.
+- Fraud investigation and risk operations teams.
+- Developers and researchers exploring explainable fraud-detection architectures.
+
+These are intended use cases; suitability for any particular organization would require evaluation and integration.
 
 ---
 
-# Final Technical Summary
+## 16. Disclaimer
 
-```text
-Input
-  |
-  +--> Supervised ML
-  |
-  +--> Anomaly Detection
-  |
-  +--> Network Intelligence
-  |
-  +--> Fraud-Ring Analysis
-  |
-  +--> Velocity / Device Signals
-  |
-  v
-Risk Engine
-  |
-  v
-0 - 39   -> ALLOW
-40 - 69  -> VERIFY
-70 - 100 -> HOLD
-  |
-  v
-Investigation Evidence
-  |
-  v
-FastAPI / Streamlit
-```
+Z-Sentinel is a fraud-detection prototype developed for demonstration, experimentation, and evaluation.
+
+Its risk scores and decisions are analytical outputs, not definitive determinations of fraud. Synthetic demonstration results do not establish production effectiveness or financial loss prevention.
+
+IBM LinuxONE validation demonstrates that the tested application configuration and automated tests ran successfully in the specified environment. It does not imply that all optional model configurations are supported or that the system has been certified for production financial services.
 
 ---
 
-# Disclaimer
+## Repository
 
-Z-Sentinel is a hackathon and research-oriented prototype intended to demonstrate AI-assisted fraud detection concepts.
-
-It is not a production financial fraud prevention system and should not be used for real financial decisions without appropriate validation, security review, compliance controls, monitoring, and human oversight.
+GitHub: https://github.com/myashwanthkumar721/Z-Sentinel
